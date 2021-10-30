@@ -1,4 +1,5 @@
-exports.showhome = async (req, res) => {
+
+exports.showHome = async (req, res) => {
     try{
         res.send({
             status: "Success",
@@ -10,5 +11,5 @@ exports.showhome = async (req, res) => {
             status: 'failed',
             message: "Server Error"
         })
-    }
+}
 }
