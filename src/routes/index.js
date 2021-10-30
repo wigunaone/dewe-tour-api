@@ -6,13 +6,13 @@ const router = express.Router();
 // Controller
 
 const { addUsers, getUsers, getUser, updateUser, deleteUser } = require("../controllers/user");
-const {register} = require("../controllers/auth");
+const {register,login} = require("../controllers/auth");
 // import controller function here
 const {addCountry, getCountries, getCountry, updateCountry, deleteCountry} = require("../controllers/country");
 // Route
 
 router.post("/register", register);
-// router.post("/login", login);
+router.post("/login", login);
 router.post("/user", addUsers);
 router.get("/users", getUsers);
 router.get("/user/:id", getUser);

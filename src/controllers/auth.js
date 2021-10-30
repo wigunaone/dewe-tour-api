@@ -56,61 +56,61 @@ exports.register = async (req, res) => {
   }
 };
 
-// exports.login = async (req, res) => {
-//     // our validation schema here
-//     const schema = Joi.object({
-//       email: Joi.string().email().min(6).required(),
-//       password: Joi.string().min(6).required(),
-//     });
+exports.login = async (req, res) => {
+    // our validation schema here
+    const schema = Joi.object({
+      email: Joi.string().email().min(6).required(),
+      password: Joi.string().min(6).required(),
+    });
   
-//     // do validation and get error object from schema.validate
-//     const { error } = schema.validate(req.body);
+    // do validation and get error object from schema.validate
+    const { error } = schema.validate(req.body);
   
-//     // if error exist send validation error message
-//     if (error)
-//       return res.status(400).send({
-//         error: {
-//           message: error.details[0].message,
-//         },
-//       });
+    // if error exist send validation error message
+    if (error)
+      return res.status(400).send({
+        error: {
+          message: error.details[0].message,
+        },
+      });
   
-//     try {
+    try {
         
-//       const userExist = await user.findOne({
-//         where: {
-//           email: req.body.email,
-//         },
-//         attributes: {
-//           exclude: ["createdAt", "updatedAt"],
-//         },
-//       });
-//       // compare password between entered from client and from database
-//       const isValid = await bcrypt.compare(req.body.password, userExist.password);
+      const userExist = await user.findOne({
+        where: {
+          email: req.body.email,
+        },
+        attributes: {
+          exclude: ["createdAt", "updatedAt"],
+        },
+      });
+      // compare password between entered from client and from database
+      const isValid = await bcrypt.compare(req.body.password, userExist.password);
   
-//       // check if not valid then return response with status 400 (bad request)
-//       if (!isValid) {
-//         return res.status(400).send({
-//           status: "failed",
-//           message: "credential is invalid",
-//         });
-//       }
+      // check if not valid then return response with status 400 (bad request)
+      if (!isValid) {
+        return res.status(400).send({
+          status: "failed",
+          message: "credential is invalid",
+        });
+      }
   
-//       // generate token
-//       const token = jwt.sign({ id: userExist.id }, process.env.TOKEN_KEY);
+      // generate token
+      const token = jwt.sign({ id: userExist.id }, process.env.TOKEN_KEY);
   
-//       res.status(200).send({
-//         status: "success...",
-//         data: {
+      res.status(200).send({
+        status: "success...",
+        data: {
          
-//           email: userExist.email,
-//           token : token
-//         },
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       res.status(500).send({
-//         status: "failed",
-//         message: "Server Error",
-//       });
-//     }
-//   };
+          email: userExist.email,
+          token : token
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({
+        status: "failed",
+        message: "Server Error",
+      });
+    }
+  };
