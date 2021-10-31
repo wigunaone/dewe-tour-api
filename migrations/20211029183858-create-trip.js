@@ -11,15 +11,7 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
-      idEmployee: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "users",
-          key: "id"
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE"
-      },
+      
       idCountry: {
         type: Sequelize.INTEGER,
         references: {
@@ -35,17 +27,26 @@ module.exports = {
       transportation: {
         type: Sequelize.STRING
       },
-      duration: {
+      eat: {
         type: Sequelize.STRING
       },
-      dateTrip: {
-        type: Sequelize.DATE
+      day: {
+        type: Sequelize.INTEGER
       },
-      description: {
-        type: Sequelize.TEXT
+      night: {
+        type: Sequelize.INTEGER
+      },
+      dateTrip: {
+        type: Sequelize.STRING
       },
       price: {
         type: Sequelize.INTEGER
+      },
+      quota: {
+        type: Sequelize.INTEGER
+      },
+      description: {
+        type: Sequelize.TEXT
       },
       photo: {
         type: Sequelize.STRING

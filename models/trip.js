@@ -10,12 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      trip.belongsTo(models.user,{
-        as: "employee",
-        foreignKey: {
-          name: "idEmployee"
-        }
-      }),
+      
       trip.belongsTo(models.country,{
         as: "country",
         foreignKey: {
@@ -27,14 +22,16 @@ module.exports = (sequelize, DataTypes) => {
   };
   trip.init({
     title: DataTypes.STRING,
-    idEmployee: DataTypes.INTEGER,
     idCountry: DataTypes.INTEGER,
     accomodation: DataTypes.STRING,
     transportation: DataTypes.STRING,
-    duration: DataTypes.STRING,
-    dateTrip: DataTypes.DATE,
-    description: DataTypes.TEXT,
+    eat: DataTypes.STRING,
+    day: DataTypes.INTEGER,
+    night: DataTypes.INTEGER,
+    dateTrip: DataTypes.STRING,
     price: DataTypes.INTEGER,
+    quota: DataTypes.INTEGER,
+    description: DataTypes.TEXT,
     photo: DataTypes.STRING
   }, {
     sequelize,
