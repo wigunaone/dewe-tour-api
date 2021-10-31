@@ -9,7 +9,7 @@ const {getUsers, deleteUser } = require("../controllers/user");
 const {register,login} = require("../controllers/auth");
 // import controller function here
 const {addCountry, getCountries, getCountry, updateCountry, deleteCountry} = require("../controllers/country");
-const {addTrip} = require("../controllers/trip");
+const {addTrip, getTrips} = require("../controllers/trip");
 
 // Route
 
@@ -31,7 +31,7 @@ router.patch("/country/:id",auth,adminOnly, updateCountry);
 router.delete("/country/:id",auth,adminOnly, deleteCountry);
 
 router.post("/trip",auth,uploadFile("photo"), addTrip)
-
+router.get("/trips",auth,getTrips)
 
 // add route here
 

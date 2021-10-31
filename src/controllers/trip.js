@@ -53,3 +53,49 @@ exports.addTrip = async (req, res) => {
   }
 };
 
+exports.getTrips = async (req, res) => {
+  try {
+    const trips = await trip.findAll({
+      include: [
+        
+        {
+          model: country,
+          as: "country",
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+      ],
+      attributes: {
+        exclude: ["idCountry","createdAt", "updatedAt"],
+      },
+    });
+
+    res.send({
+      status: "success",
+      data: trips,
+      // data: {
+      //   id: trips.id,
+      //   title: trips.title,
+      //   country: trips.country,
+      //   accomodation: trips.accomodation,
+      //   transportation: trips.transportation,
+      //   eat: trips.eat,
+      //   day: trips.day,
+      //   night: trips.night,
+      //   dateTrip: trips.dateTrip,
+      //   price: trips.price,
+      //   quota: trips.quota,
+      //   description:trips.description,
+      //   photo: trips.photo
+      // },
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
+}
+
