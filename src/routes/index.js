@@ -9,7 +9,7 @@ const {getUsers, deleteUser } = require("../controllers/user");
 const {register,login} = require("../controllers/auth");
 // import controller function here
 const {addCountry, getCountries, getCountry, updateCountry, deleteCountry} = require("../controllers/country");
-const {addTrip, getTrips} = require("../controllers/trip");
+const {addTrip, getTrips, getTrip, updateTrip, deleteTrip} = require("../controllers/trip");
 
 // Route
 
@@ -30,9 +30,11 @@ router.get("/country/:id", getCountry);
 router.patch("/country/:id",auth,adminOnly, updateCountry);
 router.delete("/country/:id",auth,adminOnly, deleteCountry);
 
-router.post("/trip",auth,uploadFile("photo"), addTrip)
+router.post("/trip",auth,adminOnly,uploadFile("photo"), addTrip)
 router.get("/trips",auth,getTrips)
+router.get("/trip/:id",auth,getTrip)
+router.patch("/trip/:id",auth,adminOnly,updateTrip)
+router.delete("/trip/:id",auth,adminOnly,deleteTrip)
 
-// add route here
 
 module.exports = router;

@@ -97,5 +97,106 @@ exports.getTrips = async (req, res) => {
       message: "Server Error",
     });
   }
-}
+};
 
+exports.getTrip = async (req, res) => {
+  const {id} = req.params;
+  try {
+    const trips = await trip.findOne({
+      where:{
+        id
+      },
+      include: [
+        
+        {
+          model: country,
+          as: "country",
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+      ],
+      attributes: {
+        exclude: ["idCountry","createdAt", "updatedAt"],
+      },
+    });
+
+    res.send({
+      status: "success",
+      data: trips,
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
+};
+
+exports.updateTrip = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const newData = await trip.update(req.body, {
+      where: {
+        id,
+      },
+    });
+    const getTrip = await trip.findOne({
+      where:{
+        id
+      },
+      include: [
+        {
+          model: country,
+          as: "country",
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+      ],
+      attributes: {
+        exclude: ["idCountry","createdAt", "updatedAt"],
+      },
+
+    })
+
+    res.send({
+      status: "success",
+      message: `Update Trip finished`,
+      data: getTrip,
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
+};
+
+exports.deleteTrip = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await trip.destroy({
+      where: {
+        id,
+      },
+    });
+
+    res.send({
+      status: "success",
+      data: {
+        id: id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
+};
