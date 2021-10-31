@@ -20,11 +20,12 @@ router.get("/users",auth,adminOnly, getUsers);
 // router.patch("/user/:id", updateUser);
 router.delete("/user/:id",auth, adminOnly, deleteUser);
 
-router.post("/country", addCountry);
+
+router.post("/country",auth,adminOnly, addCountry);
 router.get("/countries", getCountries);
 router.get("/country/:id", getCountry);
-router.patch("/country/:id", updateCountry);
-router.delete("/country/:id", deleteCountry);
+router.patch("/country/:id",auth,adminOnly, updateCountry);
+router.delete("/country/:id",auth,adminOnly, deleteCountry);
 
 
 
