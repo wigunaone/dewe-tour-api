@@ -25,6 +25,21 @@ exports.register = async (req, res) => {
     });
 
   try {
+    const userExist = await user.findOne({
+        where: {
+          email: req.body.email,
+        },
+        attributes: {
+          exclude: ["createdAt", "updatedAt"],
+        },
+      });
+
+      if(userExist){
+          return res.send({
+              status: "failed",
+              message: "already exist"
+          })
+      }
     const salt = await bcrypt.genSalt(10);
     // we hash password from request with salt
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -38,7 +53,7 @@ exports.register = async (req, res) => {
         status: "user"
     });
     
-    const token = jwt.sign({ id: user.id }, process.env.TOKEN_KEY);
+    const token = jwt.sign({ id: user.id,status: user.status }, process.env.TOKEN_KEY);
 
     res.send({
       status: "success",
@@ -75,15 +90,16 @@ exports.login = async (req, res) => {
       });
   
     try {
-        
-      const userExist = await user.findOne({
-        where: {
-          email: req.body.email,
-        },
-        attributes: {
-          exclude: ["createdAt", "updatedAt"],
-        },
-      });
+        const userExist = await user.findOne({
+            where: {
+              email: req.body.email,
+            },
+            attributes: {
+              exclude: ["createdAt", "updatedAt"],
+            },
+          });
+    
+      
       // compare password between entered from client and from database
       const isValid = await bcrypt.compare(req.body.password, userExist.password);
   
@@ -96,7 +112,7 @@ exports.login = async (req, res) => {
       }
   
       // generate token
-      const token = jwt.sign({ id: userExist.id }, process.env.TOKEN_KEY);
+      const token = jwt.sign({ id: userExist.id,status: userExist.status }, process.env.TOKEN_KEY);
   
       res.status(200).send({
         status: "success...",
