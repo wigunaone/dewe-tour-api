@@ -5,6 +5,7 @@ const Joi = require("joi");
 exports.addTrip = async (req, res) => {
   try {
     const { ...data } = req.body;
+    console.log(req.body.idCountry);
     const getCountry = await country.findOne({
       where: {
         id: req.body.idCountry
@@ -12,6 +13,7 @@ exports.addTrip = async (req, res) => {
     })
     const newTrip = await trip.create({
       ...data,
+      eat: req.body.eat,
       photo: req.files.photo[0].filename,
       
     });
