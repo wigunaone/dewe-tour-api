@@ -11,7 +11,6 @@ exports.register = async (req, res) => {
         email: Joi.string().email().min(6).required(),
         password: Joi.string().min(6).required(),
         phone: Joi.string().min(11).required(),
-        address: Joi.string().required(),
         
     })
 
@@ -117,14 +116,54 @@ exports.login = async (req, res) => {
       res.status(200).send({
         status: "success...",
         data: {
-         
+          id : userExist.id,
+          name: userExist.id,
           email: userExist.email,
+          status: userExist.status,
           token : token
         },
       });
     } catch (error) {
       console.log(error);
       res.status(500).send({
+        status: "failed",
+        message: "Server Error",
+      });
+    }
+  };
+  exports.checkAuth = async (req, res) => {
+    try {
+      const id = req.user.id;
+  
+      const dataUser = await user.findOne({
+        where: {
+          id,
+        },
+        attributes: {
+          exclude: ["createdAt", "updatedAt", "password"],
+        },
+      });
+  
+      if (!dataUser) {
+        return res.status(404).send({
+          status: "failed",
+        });
+      }
+  
+      res.send({
+        status: "success",
+        data: {
+          user: {
+            id: dataUser.id,
+            name: dataUser.name,
+            email: dataUser.email,
+            status: dataUser.status,
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      res.status({
         status: "failed",
         message: "Server Error",
       });

@@ -1,5 +1,5 @@
 
-const {trip,country,transaction} = require("../../models")
+const {trip,user,country,transaction} = require("../../models")
 
 exports.getTransaction = async (req, res) => {
     try {
@@ -16,8 +16,26 @@ exports.getTransaction = async (req, res) => {
                 attributes: {
                   exclude: ["idCountry","createdAt", "updatedAt"],
                 },
+                include: [
+                  {
+                    model: country,
+                    as: "country",
+                    attributes: {
+                      exclude: ["createdAt", "updatedAt"]
+                    }
+                  }
+                ]
               },
+              {
+                model: user, 
+                as: "user",
+                attributes: {
+                  exclude: ["createdAt", "updatedAt","password"],
+                },
+              
+              }
             ],
+
             attributes: {
               exclude: ["idTrip","createdAt", "updatedAt", ],
             },
@@ -43,10 +61,26 @@ exports.getTransactions = async (req,res) => {
               {
                 model: trip,
                 as: "trip",
+                include:{
+                  model: country,
+                  as: "country",
+                  attributes: {
+                    exclude: [,"createdAt", "updatedAt"]
+                  }
+                  
+                },
                 attributes: {
                   exclude: ["idCountry","createdAt", "updatedAt"],
                 },
               },
+              {
+                model: user, 
+                as: "user",
+                attributes: {
+                  exclude: ["createdAt", "updatedAt","password"],
+                },
+              
+              }
             ],
             attributes: {
               exclude: ["idTrip","createdAt", "updatedAt", ],
@@ -64,13 +98,69 @@ exports.getTransactions = async (req,res) => {
     });
     }
 }
+exports.getUserTransaction = async (req,res) => {
+  const idUser = req.user.id;
+  try{
+      let transactionData = await transaction.findAll({
+          where:{
+            idUser:idUser,
+          },
+          include: [
+            
+            {
+              model: trip,
+              as: "trip",
+              attributes: {
+                
+                exclude: ["idCountry","createdAt", "updatedAt"],
+              },
+              include: [
+                {
+                  model: country,
+                  as: "country",
+                  attributes: {
+                
+                    exclude: ["createdAt", "updatedAt"],
+                  },
+                }
+              ]
+              
+            },
+            {
+              model: user, 
+              as: "user",
+              attributes: {
+                exclude: ["createdAt", "updatedAt","password"],
+              },
+            
+            }
+          ],
+          attributes: {
+            exclude: ["idTrip","createdAt", "updatedAt", ],
+          },
+        });
+      transactionData = JSON.parse(JSON.stringify(transactionData));
+      res.send({
+          data:transactionData
+      })
+  }catch(error){
+      console.log(error);
+  res.status(500).send({
+    status: "failed",
+    message: "Server Error",
+  });
+  }
+}
+
 exports.addTransaction = async (req,res) => {
-    
+    const idTrip = req.body.idTrip;
+
     try{
+      console.log(req.body.idTrip)
         const {...data} = req.body;
         const getTrip = await trip.findOne({
             where: {
-                id: req.body.idTrip
+                id : idTrip
             },
             attributes: {
                 exclude: ["idCountry","createdAt", "updatedAt", ],
@@ -82,9 +172,9 @@ exports.addTransaction = async (req,res) => {
             idUser: req.user.id,
             dateTrip:getTrip.dateTrip,
             bookingDate: new Date(),
-            price:getTrip.price,
+            status: "Waiting Payment",
             total: total,
-            attachment: req.files.attachment[0].filename,
+            // attachment: req.files.attachment[0].filename,
         })
         let transactionData = await transaction.findOne({
             where: {
@@ -119,22 +209,22 @@ exports.addTransaction = async (req,res) => {
 }
 exports.updateTransaction = async (req, res) => {
     try {
-        const { id } = req.params;
-    
+        const id = req.params.id;
+
+        console.log("test" ,req.files)
+      // console.log(req.files.attachment[0].filename);
         const newData = await transaction.update({
-            idTrip: req.body.idTrip,
-            qty: req.body.qty,
             status: req.body.status,
             attachment: req.files.attachment[0].filename,
         }, 
         {
           where: {
-            id
+            id: id,
           },
         });
         const getTransaction = await transaction.findOne({
           where:{
-            id 
+            id :id,
           },
           include: [
               
@@ -154,7 +244,7 @@ exports.updateTransaction = async (req, res) => {
     
         res.send({
           status: "success",
-          message: `Update country id: ${id} finished`,
+          message: `transaction payment: ${id} finished`,
           data: getTransaction,
         });
       } catch (error) {
@@ -164,4 +254,30 @@ exports.updateTransaction = async (req, res) => {
           message: "Server Error",
         });
       }
+}
+exports.updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log( id)
+    const newData = await transaction.update({
+      status: req.body.status,
+    }, 
+    {
+      where: {
+        id
+      },
+    });
+    
+    res.send({
+      status: "success",
+      message: `update id: ${id} finished`,
+      data: req.body
+    });
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
 }

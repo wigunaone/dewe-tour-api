@@ -16,7 +16,7 @@ exports.uploadFile = (imageFile) => {
   // define function for file filtering
   const fileFilter = (req, file, cb) => {
     if (file.fieldname === imageFile) {
-      if (!file.originalname.match(/\.(jpg|JPG|JPEG|png|PNG|svg)$/)) {
+      if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|svg)$/)) {
         req.fileValidationError = {
           message: "Only image files are allowed!",
         };
@@ -40,7 +40,7 @@ exports.uploadFile = (imageFile) => {
   }).fields([
     {
       name: imageFile,
-      maxCount: 1,
+      maxCount: 10,
     },
   ]);
 

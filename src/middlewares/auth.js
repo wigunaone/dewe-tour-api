@@ -10,12 +10,16 @@ exports.auth = (req, res, next) => {
   }
 
   try {
+    // const verified = jwt.verify(token, process.env.TOKEN_KEY);
+    // req.user = verified;
+    // next();
     const verified = jwt.verify(token, process.env.TOKEN_KEY); //verified token
+    console.log(verified)
     req.user = verified;
     next(); 
   } catch (error) {
-    
-    res.status(400).send({ message: "Invalid token" });
+    console.log(error)
+    res.status(400).send({ message: error });
   }
 };
 
@@ -26,3 +30,5 @@ exports.adminOnly = (req,res, next) => {
   }
   res.status(403).send({message: "Forbidden"});
 }
+
+

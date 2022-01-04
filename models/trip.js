@@ -17,6 +17,12 @@ module.exports = (sequelize, DataTypes) => {
           name: "idCountry"
         }
       })
+      trip.hasMany(models.transaction, {
+        as: 'transactions',
+        foreignKey: {
+          name: "idTrip",
+        }
+      })
 
     }
   };
@@ -32,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.INTEGER,
     quota: DataTypes.INTEGER,
     description: DataTypes.TEXT,
-    photo: DataTypes.STRING
+    photo: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'trip',

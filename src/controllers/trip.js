@@ -1,23 +1,26 @@
-const { trip,country, user } = require("../../models");
+const { trip,country, user,transaction } = require("../../models");
 
 const Joi = require("joi");
 
 exports.addTrip = async (req, res) => {
   try {
-    const { ...data } = req.body;
-    console.log(req.body.idCountry);
-    const getCountry = await country.findOne({
-      where: {
-        id: req.body.idCountry
-      }
-    })
+    
+    let filesQuantity = req.files.photo.length;
+    console.log(req.files.photo)
+    let filenames="";
+    for(let i = 0; i< filesQuantity; i++){
+      filenames = filenames+req.files.photo[i].filename+",";
+      console.log(filenames);
+    }
+    let array = filenames.split(",");
+   console.log(req.body)
     const newTrip = await trip.create({
-      ...data,
-      eat: req.body.eat,
-      photo: req.files.photo[0].filename,
+      ...req.body,
+      // eat: req.body.eat,
+      photo: filenames,
       
     });
-    
+    // // console.log(newTrip)
     let tripData = await trip.findOne({
       where: {
         id: newTrip.id,
@@ -38,12 +41,15 @@ exports.addTrip = async (req, res) => {
     });
 
     tripData = JSON.parse(JSON.stringify(tripData));
+    // let photo = tripData.split(" ");
 
     res.send({
       status: "success",
       data: {
-        ...tripData,
-        photo: "http://localhost:5000/uploads/" + tripData.photo,
+        tripData,
+    //     photo: 
+    //     // "http://localhost:5000/uploads/" 
+    //     tripData.photo,
       },
     });
   } catch (error) {
@@ -57,7 +63,8 @@ exports.addTrip = async (req, res) => {
 
 exports.getTrips = async (req, res) => {
   try {
-    const trips = await trip.findAll({
+    let tripData = await trip.findAll({
+      
       include: [
         
         {
@@ -69,29 +76,23 @@ exports.getTrips = async (req, res) => {
         },
       ],
       attributes: {
-        exclude: ["idCountry","createdAt", "updatedAt"],
+        exclude: ["createdAt", "updatedAt", ],
       },
     });
 
+    tripData = JSON.parse(JSON.stringify(tripData));
+    // let photo = tripData.map((item) => {
+    //   return item.photo.split(" ");
+    // })
+    //"http://localhost:5000/uploads/"  
+    tripData = tripData.map((item) => {
+      return { ...item, photo: item.photo.split(",") };
+    });
     res.send({
       status: "success",
-      data: trips,
-      // data: {
-      //   id: trips.id,
-      //   title: trips.title,
-      //   country: trips.country,
-      //   accomodation: trips.accomodation,
-      //   transportation: trips.transportation,
-      //   eat: trips.eat,
-      //   day: trips.day,
-      //   night: trips.night,
-      //   dateTrip: trips.dateTrip,
-      //   price: trips.price,
-      //   quota: trips.quota,
-      //   description:trips.description,
-      //   photo: trips.photo
-      // },
+      data: tripData
     });
+    
   } catch (error) {
     console.log(error);
     res.send({
@@ -101,10 +102,53 @@ exports.getTrips = async (req, res) => {
   }
 };
 
-exports.getTrip = async (req, res) => {
-  const {id} = req.params;
+exports.getTripTransaction = async (req, res) => {
   try {
-    const trips = await trip.findOne({
+    let tripData = await trip.findAll({
+      
+      include: [
+        
+        {
+          model: country,
+          as: "country",
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: transaction,
+          as: "transaction",
+          
+        }
+      ],
+      attributes: {
+        exclude: ["createdAt", "updatedAt", ],
+      },
+    });
+
+    tripData = JSON.parse(JSON.stringify(tripData));
+    tripData = tripData.map((item) => {
+      return { ...item, photo: "http://localhost:5000/uploads/"  + item.photo };
+    });
+    res.send({
+      status: "success",
+      data: tripData
+    });
+    
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
+};
+
+
+exports.getTrip = async (req, res) => {
+  const id = req.params.id;
+  try {
+    let tripData = await trip.findOne({
       where:{
         id
       },
@@ -122,10 +166,35 @@ exports.getTrip = async (req, res) => {
         exclude: ["idCountry","createdAt", "updatedAt"],
       },
     });
+    
+    // let photos = JSON.parse(JSON.stringify(tripData));
+    let rawPhotos = tripData.photo.split(",");
+    let photoQty = rawPhotos.length;
+    let photos = [];
+    for(let i = 0; i< photoQty; i++){
+      photos.push("http://localhost:5000/uploads/"+rawPhotos[i]);
+    }
+    let data = {
+      id: tripData.id,
+      title: tripData.title,
+      accomodation: tripData.accomodation,
+      transportation: tripData.transportation,
+      eat: tripData.eat,
+      day: tripData.day,
+      night: tripData.night,
+      dateTrip: tripData.dateTrip,
+      price: tripData.price,
+      quota: tripData.quota,
+      description: tripData.description,
+      photos: photos,
+      country: tripData.country.name,
 
+
+    }
+    console.log(photos[1]);
     res.send({
       status: "success",
-      data: trips,
+      data: data
     });
   } catch (error) {
     console.log(error);

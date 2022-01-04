@@ -49,7 +49,7 @@ module.exports = {
         type: Sequelize.TEXT
       },
       photo: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,

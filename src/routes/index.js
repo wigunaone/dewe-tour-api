@@ -5,11 +5,11 @@ const router = express.Router();
 
 // Controller
 
-const {register,login} = require("../controllers/auth");
-const {getUsers, deleteUser } = require("../controllers/user");
+const {register,login,checkAuth} = require("../controllers/auth");
+const {getUsers,getUser, deleteUser,updateUser } = require("../controllers/user");
 const {addCountry, getCountries, getCountry, updateCountry, deleteCountry} = require("../controllers/country");
-const {addTrip, getTrips, getTrip, updateTrip, deleteTrip} = require("../controllers/trip");
-const { addTransaction,getTransactions,getTransaction,updateTransaction } = require("../controllers/transaction");
+const {addTrip, getTrips, getTrip, updateTrip, deleteTrip, getTripTransaction} = require("../controllers/trip");
+const { addTransaction,getTransactions,getTransaction,updateTransaction, addTransaction2, getUserTransaction, updateStatus } = require("../controllers/transaction");
 // 
 
 const {auth,adminOnly} = require("../middlewares/auth");
@@ -22,8 +22,8 @@ router.post("/login", login);
 //route user
 // router.post("/user", addUsers);
 router.get("/users",auth,adminOnly, getUsers);
-// router.get("/user/:id", getUser);
-// router.patch("/user/:id", updateUser);
+router.get("/user",auth, getUser);
+router.patch("/user",auth,uploadFile("photo"), updateUser);
 router.delete("/user/:id",auth, adminOnly, deleteUser);
 
 //route country
@@ -35,14 +35,18 @@ router.delete("/country/:id",auth,adminOnly, deleteCountry);
 
 //route trip
 router.post("/trip",auth,adminOnly,uploadFile("photo"), addTrip)
-router.get("/trips",auth,getTrips)
+router.get("/trips",getTrips);
 router.get("/trip/:id",auth,getTrip)
 router.patch("/trip/:id",auth,adminOnly,uploadFile("photo"),updateTrip)
 router.delete("/trip/:id",auth,adminOnly,deleteTrip)
 
 //route transaction
-router.post("/transaction",auth,uploadFile("attachment"), addTransaction);
-router.get("/transactions", getTransactions);
-router.get("/transaction/:id", getTransaction);
-router.patch("/transaction/:id",auth,adminOnly,uploadFile("attachment"),updateTransaction);
+router.post("/transaction",auth, addTransaction);//,uploadFile("attachment")
+router.get("/transactions",auth, getTransactions);
+router.get("/trips-transaction",auth, getTripTransaction);
+router.get("/transaction/user",auth,getUserTransaction);
+router.get("/transaction/:id", auth,getTransaction);
+router.patch("/payment/:id",auth ,uploadFile("attachment"),updateTransaction);
+router.patch("/update/:id", auth,adminOnly,updateStatus);
+router.get("/checkAuth",auth,checkAuth);
 module.exports = router;
