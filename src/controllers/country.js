@@ -5,17 +5,33 @@ const Joi = require("joi");
 exports.addCountry = async (req, res) => {
     
   try {
-    const newCountry = await country.create(req.body);
-    const getCountry = await country.findAll({
+    const countryExist = await country.findOne({
+      where: {
+        name: req.body.name,
+      },
       attributes: {
         exclude: ["createdAt", "updatedAt"],
       },
     });
-    const lastData = getCountry[getCountry.length - 1];
+    if(countryExist){
+      return res.send({
+          status: "failed",
+          message: "Country already exist"
+      })
+  }
+    const newCountry = await country.create(req.body);
+    const getCountry = await country.findOne({
+      where: {
+        name: newCountry.id,
+      },
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+    });
     res.send({
       status: "success",
       message: "Add Country finished",
-      data: lastData,
+      data: getCountry,
     });
   } catch (error) {
     console.log(error);

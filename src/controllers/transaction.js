@@ -1,6 +1,9 @@
-
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const Fn = Sequelize.fn;
+const Col = Sequelize.col;
 const {trip,user,country,transaction} = require("../../models")
-
+const Joi = require("joi");
 exports.getTransaction = async (req, res) => {
     try {
         const { id } = req.params;
@@ -105,6 +108,9 @@ exports.getUserTransaction = async (req,res) => {
           where:{
             idUser:idUser,
           },
+          order: [
+            ['id', 'DESC']
+          ],
           include: [
             
             {
@@ -195,7 +201,8 @@ exports.addTransaction = async (req,res) => {
             },
           });
         transactionData = JSON.parse(JSON.stringify(transactionData));
-        res.send({
+        res.send(200,{
+            status: "success",
             data:transactionData
         })
     }catch(error){
@@ -208,6 +215,12 @@ exports.addTransaction = async (req,res) => {
 
 }
 exports.updateTransaction = async (req, res) => {
+  if(!req.files.attachment){
+    return res.status(400).send({
+      status:"failed",
+      message: "please input photo"
+    })
+  }
     try {
         const id = req.params.id;
 
@@ -281,3 +294,50 @@ exports.updateStatus = async (req, res) => {
     });
   }
 }
+exports.getTripTransaction = async (req, res) => {
+  try {
+    let transactionData = await transaction.findAll({
+            
+      include: [
+        
+        {
+          model: trip,
+          as: "trip",
+          include:{
+            model: country,
+            as: "country",
+            attributes: {
+              exclude: [,"createdAt", "updatedAt"]
+            }
+            
+          },
+          attributes: {
+            exclude: ["idCountry","createdAt", "updatedAt"],
+          },
+        },
+        {
+          model: user, 
+          as: "user",
+          attributes: {
+            exclude: ["createdAt", "updatedAt","password"],
+          },
+        
+        }
+      ],
+      attributes: {
+        exclude: ["idTrip","createdAt", "updatedAt", ],
+      },
+      group: "idTrip"
+    });
+  transactionData = JSON.parse(JSON.stringify(transactionData));
+  res.send({
+      data:transactionData
+  })
+  } catch (error) {
+    console.log(error);
+    res.send({
+      status: "failed",
+      message: "Server Error",
+    });
+  }
+};

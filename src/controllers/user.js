@@ -100,12 +100,13 @@ exports.updateUser = async (req, res) => {
         const photo = {
           photo: req.files.photo[0].filename
         }
-        body = Object.assign({},req.body, {photo: req.files.photo[0].filename});
+        body = Object.assign({}, req.body, {photo: req.files.photo[0].filename});
       }else{
         body = req.body;
       }
       
-    
+    console.log(req.body)
+    console.log(body)
     const id  = req.user.id;
     
     await user.update(body, {

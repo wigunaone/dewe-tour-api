@@ -1,10 +1,28 @@
 const { trip,country, user,transaction } = require("../../models");
 
 const Joi = require("joi");
+const Sequelize = require('sequelize');
+const { col } = require("sequelize");
+const Op = Sequelize.Op;
+const Fn = Sequelize.fn;
+const Col = Sequelize.col;
 
 exports.addTrip = async (req, res) => {
   try {
-    
+    const tripExist = await trip.findOne({
+      where: {
+        title: req.body.title,
+      },
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+    });
+    if(tripExist){
+      return res.send({
+          status: "failed",
+          message: "Trip already exist"
+      })
+  }
     let filesQuantity = req.files.photo.length;
     console.log(req.files.photo)
     let filenames="";
@@ -80,11 +98,7 @@ exports.getTrips = async (req, res) => {
       },
     });
 
-    tripData = JSON.parse(JSON.stringify(tripData));
-    // let photo = tripData.map((item) => {
-    //   return item.photo.split(" ");
-    // })
-    //"http://localhost:5000/uploads/"  
+    tripData = JSON.parse(JSON.stringify(tripData)); 
     tripData = tripData.map((item) => {
       return { ...item, photo: item.photo.split(",") };
     });
@@ -105,7 +119,6 @@ exports.getTrips = async (req, res) => {
 exports.getTripTransaction = async (req, res) => {
   try {
     let tripData = await trip.findAll({
-      
       include: [
         
         {
@@ -115,24 +128,71 @@ exports.getTripTransaction = async (req, res) => {
             exclude: ["createdAt", "updatedAt"],
           },
         },
-        {
-          model: transaction,
-          as: "transaction",
-          
-        }
       ],
       attributes: {
         exclude: ["createdAt", "updatedAt", ],
       },
     });
+    let sumData = await transaction.findAll({
+      where: {
+        // status: "Approved",
+      },
+      attributes: [
+        'idTrip',
+        [Fn('SUM', Col('total')), 'sumTotal']
+      ],
+      group: 'idTrip'
+    })
+    
+    let tripD = JSON.parse(JSON.stringify(tripData));
 
-    tripData = JSON.parse(JSON.stringify(tripData));
-    tripData = tripData.map((item) => {
-      return { ...item, photo: "http://localhost:5000/uploads/"  + item.photo };
+    //mengubah string photos ke dalam array
+    tripD = tripD.map((item) => {
+      return { ...item, photo: item.photo.split(",") };
     });
+    let total = JSON.parse(JSON.stringify(sumData));
+    let data = [];
+    
+        for (let i = 0; i < tripD.length; i++){
+          let falseObject = {
+            ...tripD[i],
+            sum: 0,
+          };
+            for (let j = 0; j < total.length; j++){
+
+              if(tripD[i].id == total[j].idTrip){
+                  let trueObject = {
+                    ...tripD[i],
+                    sum: total[j].sumTotal,
+                  }
+                  
+                  data.push(trueObject) 
+              }
+            } 
+            data.push(falseObject);
+         }
+         let ganjil = [];
+         let genap = [];
+    // })
+    for(let k = 0; k <data.length; k++){
+      let index = k +1;
+
+      if( (index % 2) == 0){
+        genap.push(data[k]);
+      }
+      else{
+        ganjil.push(data[k])
+      }
+     
+    }
+    console.log(tripD.length)
+    console.log(data.length)
+    console.log(ganjil.length)
     res.send({
       status: "success",
-      data: tripData
+      data: ganjil,
+      secondData: data
+
     });
     
   } catch (error) {
@@ -271,3 +331,46 @@ exports.deleteTrip = async (req, res) => {
     });
   }
 };
+
+exports.searchTrip = async (req, res) => {
+  const word = req.params.word;
+  const searchWord = `%${word}%`;
+
+  try {
+    let tripData = await trip.findAll({
+        where: {
+            title: {
+                [Op.like]: searchWord
+            },
+        },
+        include: [
+            {
+                model: country,
+                as: "country",
+                attributes: {
+                    exclude: ["createdAt","updatedAt","status","password","photo"]
+                }
+            }
+        ],
+        attributes: {
+            exclude: ["createdAt","updatedAt"]
+        },
+    });
+    
+    tripData = JSON.parse(JSON.stringify(tripData)); 
+    tripData = tripData.map((item) => {
+      return { ...item, photo: item.photo.split(",") };
+    });
+    res.send({
+      status: "success",
+      data: tripData
+    });
+    
+    
+} catch (error) {
+    console.log(error);
+    res.send(500,{
+        error: error,
+    })
+}
+}
